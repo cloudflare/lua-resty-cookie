@@ -41,8 +41,9 @@ local function get_cookie_table(text_cookie)
     local i = 1
     local j = 1
     local key, value
+    local len = #text_cookie
 
-    while j <= #text_cookie do
+    while j <= len do
         if state == EXPECT_KEY then
             if get_string_byte(text_cookie, j) == EQUAL then
                 key = get_string_sub(text_cookie, i, j - 1)
