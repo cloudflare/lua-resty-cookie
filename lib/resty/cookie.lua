@@ -8,6 +8,7 @@ local get_string_sub    = string.sub
 local EQUAL         = get_string_byte("=")
 local SEMICOLON     = get_string_byte(";")
 local SPACE         = get_string_byte(" ")
+local HTAB          = get_string_byte("\t")
 
 
 local ok, new_tab = pcall(require, "table.new")
@@ -36,7 +37,7 @@ local function get_cookie_table(text_cookie)
     local EXPECT_VALUE  = 2
     local EXPECT_SP     = 3
 
-    local state = EXPECT_KEY
+    local state = EXPECT_SP
     local i = 1
     local j = 1
     local key, value
@@ -49,7 +50,10 @@ local function get_cookie_table(text_cookie)
                 i = j + 1
             end
         elseif state == EXPECT_VALUE then
-            if get_string_byte(text_cookie, j) == SEMICOLON then
+            if get_string_byte(text_cookie, j) == SEMICOLON or
+                    get_string_byte(text_cookie, j) == SPACE or
+                    get_string_byte(text_cookie, j) == HTAB then
+
                 value = get_string_sub(text_cookie, i, j - 1)
                 cookie_table[key] = value
 
@@ -58,7 +62,8 @@ local function get_cookie_table(text_cookie)
                 i = j + 1
             end
         elseif state == EXPECT_SP then
-            if get_string_byte(text_cookie, j) ~= SPACE then
+            if get_string_byte(text_cookie, j) ~= SPACE and
+                    get_string_byte(text_cookie, j) ~= HTAB then
                 state = EXPECT_KEY
                 i = j
                 j = j - 1

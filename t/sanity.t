@@ -77,6 +77,7 @@ Cookie: SID=31d4d96e407aad42; lang=en-US
 lang => en-US
 
 
+
 === TEST 3: no cookie header
 --- http_config eval: $::HttpConfig
 --- config
@@ -98,6 +99,7 @@ GET /t
 --- error_log
 no cookie found in current request
 --- response_body
+
 
 
 === TEST 4: empty value
@@ -127,3 +129,28 @@ Cookie: SID=
 SID => 
 
 
+
+=== TEST 5: cookie with space/tab
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local fields = cookie:get_all()
+
+            for k, v in pairs(fields) do
+                ngx.say(k, " => ", v)
+            end
+        ';
+    }
+--- request
+GET /t
+--- more_headers eval: "Cookie:  SID=foo\t"
+--- response_body
+SID => foo
