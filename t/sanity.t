@@ -5,7 +5,7 @@ use Cwd qw(cwd);
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 2 + 1);
+plan tests => repeat_each() * (blocks() * 3);
 
 my $pwd = cwd();
 
@@ -47,6 +47,8 @@ __DATA__
 GET /t
 --- more_headers
 Cookie: SID=31d4d96e407aad42; lang=en-US
+--- no_error_log
+[error]
 --- response_body
 SID => 31d4d96e407aad42
 lang => en-US
@@ -73,6 +75,8 @@ lang => en-US
 GET /t
 --- more_headers
 Cookie: SID=31d4d96e407aad42; lang=en-US
+--- no_error_log
+[error]
 --- response_body
 lang => en-US
 
@@ -87,6 +91,7 @@ lang => en-US
             local cookie, err = ck:new()
             if not cookie then
                 ngx.log(ngx.ERR, err)
+                ngx.say(err)
                 return
             end
 
@@ -99,6 +104,7 @@ GET /t
 --- error_log
 no cookie found in current request
 --- response_body
+no cookie found in current request
 
 
 
@@ -125,6 +131,8 @@ no cookie found in current request
 GET /t
 --- more_headers
 Cookie: SID=
+--- no_error_log
+[error]
 --- response_body
 SID => 
 
@@ -152,5 +160,7 @@ SID =>
 --- request
 GET /t
 --- more_headers eval: "Cookie:  SID=foo\t"
+--- no_error_log
+[error]
 --- response_body
 SID => foo
