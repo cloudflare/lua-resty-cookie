@@ -1,14 +1,17 @@
 -- Copyright (C) 2013 Jiale Zhi (calio), Cloudflare Inc.
 -- require "luacov"
 
-local type              = type
-local get_string_byte   = string.byte
-local get_string_sub    = string.sub
+local type          = type
+local byte          = string.byte
+local sub           = string.sub
+local format        = string.format
+local log           = ngx.log
+local ERR           = ngx.ERR
 
-local EQUAL         = get_string_byte("=")
-local SEMICOLON     = get_string_byte(";")
-local SPACE         = get_string_byte(" ")
-local HTAB          = get_string_byte("\t")
+local EQUAL         = byte("=")
+local SEMICOLON     = byte(";")
+local SPACE         = byte(" ")
+local HTAB          = byte("\t")
 
 
 local ok, new_tab = pcall(require, "table.new")
@@ -26,36 +29,44 @@ local mt = { __index = _M }
 
 local function get_cookie_table(text_cookie)
     if type(text_cookie) ~= "string" then
-        ngx.log(ngx.ERR, string.format(
-                "expect text_cookie to be \"string\" but found %s",
+        log(ERR, format("expect text_cookie to be \"string\" but found %s",
                 type(text_cookie)))
         return {}
     end
 
-    local cookie_table  = {}
     local EXPECT_KEY    = 1
     local EXPECT_VALUE  = 2
     local EXPECT_SP     = 3
+
+    local n = 0
+    local len = #text_cookie
+
+    for i=1, len do
+        if byte(text_cookie, i) == SEMICOLON then
+            n = n + 1
+        end
+    end
+
+    local cookie_table  = new_tab(n + 1)
 
     local state = EXPECT_SP
     local i = 1
     local j = 1
     local key, value
-    local len = #text_cookie
 
     while j <= len do
         if state == EXPECT_KEY then
-            if get_string_byte(text_cookie, j) == EQUAL then
-                key = get_string_sub(text_cookie, i, j - 1)
+            if byte(text_cookie, j) == EQUAL then
+                key = sub(text_cookie, i, j - 1)
                 state = EXPECT_VALUE
                 i = j + 1
             end
         elseif state == EXPECT_VALUE then
-            if get_string_byte(text_cookie, j) == SEMICOLON or
-                    get_string_byte(text_cookie, j) == SPACE or
-                    get_string_byte(text_cookie, j) == HTAB then
-
-                value = get_string_sub(text_cookie, i, j - 1)
+            if byte(text_cookie, j) == SEMICOLON
+                    or byte(text_cookie, j) == SPACE
+                    or byte(text_cookie, j) == HTAB
+            then
+                value = sub(text_cookie, i, j - 1)
                 cookie_table[key] = value
 
                 key, value = nil, nil
@@ -63,8 +74,9 @@ local function get_cookie_table(text_cookie)
                 i = j + 1
             end
         elseif state == EXPECT_SP then
-            if get_string_byte(text_cookie, j) ~= SPACE and
-                    get_string_byte(text_cookie, j) ~= HTAB then
+            if byte(text_cookie, j) ~= SPACE
+                and byte(text_cookie, j) ~= HTAB
+            then
                 state = EXPECT_KEY
                 i = j
                 j = j - 1
@@ -74,7 +86,7 @@ local function get_cookie_table(text_cookie)
     end
 
     if key ~= nil and value == nil then
-        cookie_table[key] = get_string_sub(text_cookie, i)
+        cookie_table[key] = sub(text_cookie, i)
     end
 
     return cookie_table
