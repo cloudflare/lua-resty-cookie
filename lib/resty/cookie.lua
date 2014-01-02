@@ -47,7 +47,7 @@ local function get_cookie_table(text_cookie)
         end
     end
 
-    local cookie_table  = new_tab(n + 1)
+    local cookie_table  = new_tab(0, n + 1)
 
     local state = EXPECT_SP
     local i = 1
