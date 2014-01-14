@@ -1,4 +1,5 @@
 -- Copyright (C) 2013 Jiale Zhi (calio), Cloudflare Inc.
+-- See RFC6265 http://tools.ietf.org/search/rfc6265
 -- require "luacov"
 
 local type          = type
