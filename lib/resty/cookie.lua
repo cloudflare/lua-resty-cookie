@@ -95,13 +95,16 @@ end
 
 function _M.new(self)
     local _cookie = ngx.var.http_cookie
-    if not _cookie then
-        return nil, "no cookie found in current request"
-    end
+    --if not _cookie then
+        --return nil, "no cookie found in current request"
+    --end
     return setmetatable({ _cookie = _cookie }, mt)
 end
 
 function _M.get(self, key)
+    if not self._cookie then
+        return nil, "no cookie found in the current request"
+    end
     if self.cookie_table == nil then
         self.cookie_table = get_cookie_table(self._cookie)
     end
@@ -112,11 +115,44 @@ end
 function _M.get_all(self)
     local err
 
+    if not self._cookie then
+        return nil, "no cookie found in the current request"
+    end
+
     if self.cookie_table == nil then
         self.cookie_table = get_cookie_table(self._cookie)
     end
 
     return self.cookie_table
+end
+
+local function bake(cookie)
+    if not cookie.key or not cookie.value then
+        return nil, 'missing cookie field "key" or "value"'
+    end
+
+    if cookie["max-age"] then
+        cookie.max_age = cookie["max-age"]
+    end
+    local str = cookie.key .. "=" .. cookie.value
+        .. (cookie.expires and "; Expires=" .. cookie.expires or "")
+        .. (cookie.max_age and "; Max-Age=" .. cookie.max_age or "")
+        .. (cookie.domain and "; Domain=" .. cookie.domain or "")
+        .. (cookie.path and "; Path=" .. cookie.path or "")
+        .. (cookie.secure and "; Secure" or "")
+        .. (cookie.httponly and "; HttpOnly" or "")
+        .. (cookie.extension and "; " .. cookie.extension or "")
+    return str
+end
+
+function _M.set(self, cookie)
+    local cookie_str, err = bake(cookie)
+    if not cookie_str then
+        return nil, err
+    end
+    print(cookie_str)
+    ngx.header['Set-Cookie'] = cookie_str
+    return true
 end
 
 return _M

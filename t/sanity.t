@@ -5,7 +5,7 @@ use Cwd qw(cwd);
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3);
+plan tests => repeat_each() * (blocks() * 3 + 2);
 
 my $pwd = cwd();
 
@@ -95,16 +95,21 @@ lang => en-US
                 return
             end
 
-            local field = cookie:get("lang")
+            local field, err = cookie:get("lang")
+            if not field then
+                ngx.log(ngx.ERR, err)
+                ngx.say(err)
+                return
+            end
             ngx.say("lang", " => ", field)
         ';
     }
 --- request
 GET /t
 --- error_log
-no cookie found in current request
+no cookie found in the current request
 --- response_body
-no cookie found in current request
+no cookie found in the current request
 
 
 
@@ -164,3 +169,81 @@ GET /t
 [error]
 --- response_body
 SID => foo
+
+
+
+=== TEST 6: set cookie
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Name", value = "Bob", path = "/",
+                domain = "example.com", secure = true, httponly = true,
+                expires = "Wed, 09 Jun 2021 10:18:14 GMT", max_age = 50,
+                extension = "a4334aebaec"
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+            ngx.say("Set cookie")
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- response_headers
+Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; a4334aebaec
+--- response_body
+Set cookie
+
+
+
+=== TEST 7: set multiple cookie
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Name", value = "Bob", path = "/",
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Age", value = "20",
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+            ngx.say("Set cookie")
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- response_headers
+Set-Cookie: Name=Bob; Path=/
+Set-Cookie: Age=20
+--- response_body
+Set cookie
