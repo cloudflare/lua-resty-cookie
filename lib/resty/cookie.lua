@@ -165,9 +165,11 @@ function _M.set(self, cookie)
 
     if set_cookie_type == "string" then
         -- only one cookie has been setted
-        t[1] = set_cookie
-        t[2] = cookie_str
-        ngx_header['Set-Cookie'] = t
+        if set_cookie ~= cookie_str then
+            t[1] = set_cookie
+            t[2] = cookie_str
+            ngx_header['Set-Cookie'] = t
+        end
     elseif set_cookie_type == "table" then
         -- more than one cookies has been setted
         local size = #set_cookie
@@ -176,6 +178,10 @@ function _M.set(self, cookie)
         -- so create a new table, copy all the values, and then set it back
         for i=1, size do
             t[i] = ngx_header['Set-Cookie'][i]
+            if t[i] == cookie_str then
+                -- new cookie is duplicated
+                return true
+            end
         end
         t[size + 1] = cookie_str
         ngx_header['Set-Cookie'] = t

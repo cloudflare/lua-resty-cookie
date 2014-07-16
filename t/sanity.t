@@ -5,7 +5,7 @@ use Cwd qw(cwd);
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3 + 2);
+plan tests => repeat_each() * (blocks() * 3 + 4);
 
 my $pwd = cwd();
 
@@ -255,5 +255,55 @@ GET /t
 because "--- response_headers" does not work with multiple headers with the same
 key, so use "--- raw_response_headers_like" instead
 --- raw_response_headers_like: Set-Cookie: Name=Bob; Path=/\r\nSet-Cookie: Age=20\r\nSet-Cookie: ID=0xf7898; Expires=Wed, 09 Jun 2021 10:18:14 GMT
+--- response_body
+Set cookie
+
+
+
+=== TEST 8: remove duplicated cookies in cookie:set
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Name", value = "Bob", path = "/",
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Age", value = "20",
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Name", value = "Bob", path = "/",
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            ngx.say("Set cookie")
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- raw_response_headers_like: Set-Cookie: Name=Bob; Path=/\r\nSet-Cookie: Age=20\r\n
+--- raw_response_headers_unlike: Set-Cookie: Name=Bob; Path=/\r\nSet-Cookie: Age=20\r\nSet-Cookie: Name=Bob; Path=/
 --- response_body
 Set cookie
