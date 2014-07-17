@@ -9,6 +9,11 @@ Table of Contents
 * [Name](#name)
 * [Status](#status)
 * [Synopsis](#synopsis)
+* [Methods](#methods)
+    * [new](#new)
+    * [get](#get)
+    * [get_all](#get_all)
+    * [set](#set)
 * [Installation](#installation)
 * [Authors](#authors)
 * [Copyright and License](#copyright-and-license)
@@ -16,7 +21,7 @@ Table of Contents
 Status
 ======
 
-This library is still experimental and under early development.
+This library is production ready.
 
 Synopsis
 ========
@@ -73,6 +78,54 @@ Synopsis
             end
         }
     }
+
+Methods
+=======
+
+[Back to TOC](#table-of-contents)
+
+new
+---
+`syntax: cookie_obj = cookie()`
+
+Create a new cookie object for current request. You can get parsed cookie from client or set cookie to client later using this object.
+
+[Back to TOC](#table-of-contents)
+
+get
+---
+`syntax: cookie_val, err = cookie_obj:get(cookie_name)`
+
+Get a single client cookie value. On error, returns `nil` and an error message.
+
+[Back to TOC](#table-of-contents)
+
+get_all
+-------
+`syntax: fields = cookie_obj:get_all()
+
+Get all client cookie key/value pairs in a lua table. On error, returns `nil` and an error message.
+
+[Back to TOC](#table-of-contents)
+
+set
+---
+`syntax: ok = cookie_obj:set({
+                key = "Name",
+                value = "Bob",
+                path = "/",
+                domain = "example.com",
+                secure = true, httponly = true,
+                expires = "Wed, 09 Jun 2021 10:18:14 GMT",
+                max_age = 50,
+                extension = "a4334aebaec"
+})
+`
+
+Set a cookie to client. This will add a new 'Set-Cookie' response header. `key` and `value` are required, all other fields are optional.
+If the same cookie (whole cookie string, e.g. "Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly;") has already been setted, new cookie will be ignored.
+
+[Back to TOC](#table-of-contents)
 
 Installation
 ============
