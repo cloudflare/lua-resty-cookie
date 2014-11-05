@@ -102,7 +102,7 @@ Get a single client cookie value. On error, returns `nil` and an error message.
 
 get_all
 -------
-`syntax: fields = cookie_obj:get_all()
+`syntax: fields, err = cookie_obj:get_all()`
 
 Get all client cookie key/value pairs in a lua table. On error, returns `nil` and an error message.
 
@@ -110,17 +110,18 @@ Get all client cookie key/value pairs in a lua table. On error, returns `nil` an
 
 set
 ---
-`syntax: ok = cookie_obj:set({
-                key = "Name",
-                value = "Bob",
-                path = "/",
-                domain = "example.com",
-                secure = true, httponly = true,
-                expires = "Wed, 09 Jun 2021 10:18:14 GMT",
-                max_age = 50,
-                extension = "a4334aebaec"
+```lua
+syntax: ok, err = cookie_obj:set({
+    key = "Name",
+    value = "Bob",
+    path = "/",
+    domain = "example.com",
+    secure = true, httponly = true,
+    expires = "Wed, 09 Jun 2021 10:18:14 GMT",
+    max_age = 50,
+    extension = "a4334aebaec"
 })
-`
+```
 
 Set a cookie to client. This will add a new 'Set-Cookie' response header. `key` and `value` are required, all other fields are optional.
 If the same cookie (whole cookie string, e.g. "Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly;") has already been setted, new cookie will be ignored.
