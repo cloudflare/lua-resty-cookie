@@ -8,6 +8,7 @@ local sub           = string.sub
 local format        = string.format
 local log           = ngx.log
 local ERR           = ngx.ERR
+local WARN          = ngx.WARN
 local ngx_header    = ngx.header
 
 local EQUAL         = byte("=")
@@ -136,6 +137,17 @@ local function bake(cookie)
     if cookie["max-age"] then
         cookie.max_age = cookie["max-age"]
     end
+
+	if (cookie.samesite) then
+		local samesite = cookie.samesite
+
+		-- if we dont have a valid-looking attribute, ignore the attribute
+		if (samesite ~= "Strict" and samesite ~= "Lax") then
+			log(WARN, "SameSite value must be 'Strict' or 'Lax'")
+			cookie.samesite = nil
+		end
+	end
+
     local str = cookie.key .. "=" .. cookie.value
         .. (cookie.expires and "; Expires=" .. cookie.expires or "")
         .. (cookie.max_age and "; Max-Age=" .. cookie.max_age or "")
@@ -143,6 +155,7 @@ local function bake(cookie)
         .. (cookie.path and "; Path=" .. cookie.path or "")
         .. (cookie.secure and "; Secure" or "")
         .. (cookie.httponly and "; HttpOnly" or "")
+        .. (cookie.samesite and "; SameSite=" .. cookie.samesite or "")
         .. (cookie.extension and "; " .. cookie.extension or "")
     return str
 end
