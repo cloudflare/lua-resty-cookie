@@ -1,4 +1,4 @@
--- Copyright (C) 2013 Jiale Zhi (calio), Cloudflare Inc.
+-- Copyright (C) 2013-2016 Jiale Zhi (calio), CloudFlare Inc.
 -- See RFC6265 http://tools.ietf.org/search/rfc6265
 -- require "luacov"
 
