@@ -138,15 +138,15 @@ local function bake(cookie)
         cookie.max_age = cookie["max-age"]
     end
 
-	if (cookie.samesite) then
-		local samesite = cookie.samesite
+    if (cookie.samesite) then
+        local samesite = cookie.samesite
 
-		-- if we dont have a valid-looking attribute, ignore the attribute
-		if (samesite ~= "Strict" and samesite ~= "Lax") then
-			log(WARN, "SameSite value must be 'Strict' or 'Lax'")
-			cookie.samesite = nil
-		end
-	end
+        -- if we dont have a valid-looking attribute, ignore the attribute
+        if (samesite ~= "Strict" and samesite ~= "Lax") then
+            log(WARN, "SameSite value must be 'Strict' or 'Lax'")
+            cookie.samesite = nil
+        end
+    end
 
     local str = cookie.key .. "=" .. cookie.value
         .. (cookie.expires and "; Expires=" .. cookie.expires or "")
