@@ -5,7 +5,7 @@ use Cwd qw(cwd);
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3 + 4);
+plan tests => repeat_each() * (blocks() * 3 + 6);
 
 my $pwd = cwd();
 
@@ -52,8 +52,6 @@ Cookie: SID=31d4d96e407aad42; lang=en-US
 --- response_body
 SID => 31d4d96e407aad42
 lang => en-US
-
-
 
 === TEST 2: sanity 2
 --- http_config eval: $::HttpConfig
@@ -188,7 +186,7 @@ SID => foo
                 key = "Name", value = "Bob", path = "/",
                 domain = "example.com", secure = true, httponly = true,
                 expires = "Wed, 09 Jun 2021 10:18:14 GMT", max_age = 50,
-                extension = "a4334aebaec"
+                samesite = "Strict", extension = "a4334aebaec"
             })
             if not ok then
                 ngx.log(ngx.ERR, err)
@@ -202,7 +200,7 @@ GET /t
 --- no_error_log
 [error]
 --- response_headers
-Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; a4334aebaec
+Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; SameSite=Strict; a4334aebaec
 --- response_body
 Set cookie
 
@@ -307,3 +305,42 @@ GET /t
 --- raw_response_headers_unlike: Set-Cookie: Name=Bob; Path=/\r\nSet-Cookie: Age=20\r\nSet-Cookie: Name=Bob; Path=/
 --- response_body
 Set cookie
+
+
+=== TEST 9: set cookie with invalid SameSite attribute
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Name", value = "Bob", path = "/",
+                domain = "example.com", secure = true, httponly = true,
+                expires = "Wed, 09 Jun 2021 10:18:14 GMT", max_age = 50,
+                samesite = "blahblah", extension = "a4334aebaec"
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+            ngx.say("Set cookie")
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- error_log
+SameSite value must be 'Strict' or 'Lax'
+--- response_headers
+Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; a4334aebaec
+--- response_body
+Set cookie
+
+

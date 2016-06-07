@@ -62,7 +62,7 @@ Synopsis
                     key = "Name", value = "Bob", path = "/",
                     domain = "example.com", secure = true, httponly = true,
                     expires = "Wed, 09 Jun 2021 10:18:14 GMT", max_age = 50,
-                    extension = "a4334aebaec"
+                    samesite = "Strict", extension = "a4334aebaec"
                 })
                 if not ok then
                     ngx.log(ngx.ERR, err)
@@ -122,6 +122,7 @@ syntax: ok, err = cookie_obj:set({
     secure = true, httponly = true,
     expires = "Wed, 09 Jun 2021 10:18:14 GMT",
     max_age = 50,
+    samesite = "Strict",
     extension = "a4334aebaec"
 })
 ```
