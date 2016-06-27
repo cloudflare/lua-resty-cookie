@@ -65,6 +65,13 @@ local function get_cookie_table(text_cookie)
                 key = sub(text_cookie, i, j - 1)
                 state = EXPECT_VALUE
                 i = j + 1
+            elseif byte(text_cookie, j) == SEMICOLON then
+                value = sub(text_cookie, i, j - 1)
+                cookie_table[""] = value
+
+                key, value = nil, nil
+                state = EXPECT_SP
+                i = j + 1
             end
         elseif state == EXPECT_VALUE then
             if byte(text_cookie, j) == SEMICOLON
