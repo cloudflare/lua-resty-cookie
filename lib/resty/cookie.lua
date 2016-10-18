@@ -200,4 +200,8 @@ function _M.set(self, cookie)
     return true
 end
 
+function _M.get_cookie_string(cookie)
+    return bake(cookie)
+end
+
 return _M
