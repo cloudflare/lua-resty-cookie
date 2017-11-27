@@ -13,6 +13,7 @@ Table of Contents
     * [new](#new)
     * [get](#get)
     * [get_all](#get_all)
+    * [get_all_as_list](#get_all_as_list)
     * [set](#set)
 * [Installation](#installation)
 * [Authors](#authors)
@@ -55,6 +56,22 @@ Synopsis
 
                 for k, v in pairs(fields) do
                     ngx.say(k, " => ", v)
+                end
+
+                -- get all cookies as list
+                -- This method is introduced to handle multiple cookies with same name. An HTTP request can
+                -- have multiple cookies with same name when they have different PATH or different
+                -- DOMAIN(a sub domain). For e.g. Cookies created by example.com domain will be accessible
+                -- to test.example.com
+                local cookies, err = cookie:get_all_as_list()
+                if not cookies then
+                    ngx.log(ngx.ERR, err)
+                    return
+                end
+
+                for i=1,#cookies do
+                    local cookie = cookies[i]
+                    ngx.say(cookie["name"].."=>"..cookie["value"])
                 end
 
                 -- set one cookie
@@ -108,6 +125,16 @@ get_all
 `syntax: fields, err = cookie_obj:get_all()`
 
 Get all client cookie key/value pairs in a lua table. On error, returns `nil` and an error message.
+
+[Back to TOC](#table-of-contents)
+
+get_all_as_list
+---------------
+`syntax: cookies, err = cookie_obj:get_all_as_list()`
+
+Get all client cookie key/value pairs in a lua table as list of cookies. The list also includes multiple cookies with the same name. On error, returns `nil` and an error message.
+
+*get_all* will override the previous cookie value with latest cookie value when request has mutliple cookies with same name.
 
 [Back to TOC](#table-of-contents)
 
