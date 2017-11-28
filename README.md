@@ -71,7 +71,7 @@ Synopsis
 
                 for i=1,#cookies do
                     local cookie_item = cookies[i]
-                    ngx.say(cookie_item["name"].."=>"..cookie_item["value"])
+                    ngx.say(cookie_item["name"], " => ", cookie_item["value"])
                 end
 
                 -- set one cookie
