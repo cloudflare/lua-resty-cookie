@@ -337,10 +337,43 @@ GET /t
 --- no_error_log
 [error]
 --- error_log
-SameSite value must be 'Strict' or 'Lax'
+SameSite value must be 'Strict', 'Lax' or 'None'
 --- response_headers
 Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; a4334aebaec
 --- response_body
 Set cookie
 
 
+=== TEST 10: set cookie with None as a valid SameSite attribute
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = cookie:set({
+                key = "Name", value = "Bob", path = "/",
+                domain = "example.com", secure = true, httponly = true,
+                expires = "Wed, 09 Jun 2021 10:18:14 GMT", max_age = 50,
+                samesite = "None", extension = "a4334aebaec"
+            })
+            if not ok then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+            ngx.say("Set cookie")
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- response_headers
+Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; SameSite=None; a4334aebaec
+--- response_body
+Set cookie
