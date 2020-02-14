@@ -1,0 +1,25 @@
+# vim:st=2 sts=2 sw=2 et:
+os: linux
+dist: bionic
+
+language: c
+compiler: gcc
+
+env:
+  global:
+    - TEST_NGINX_BINARY=/usr/bin/openresty
+
+cache:
+  apt: true
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb http://openresty.org/package/ubuntu bionic main'
+        key_url: https://openresty.org/package/pubkey.gpg
+    packages:
+      - openresty
+      - libtest-nginx-perl
+
+script:
+  - prove  -r t/
