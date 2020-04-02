@@ -129,6 +129,7 @@ function _M.get_all(self)
     return self.cookie_table
 end
 
+-- Turns a set-cookie table into a string
 local function bake(cookie)
     if not cookie.key or not cookie.value then
         return nil, 'missing cookie field "key" or "value"'
@@ -198,6 +199,84 @@ function _M.set(self, cookie)
         ngx_header['Set-Cookie'] = cookie_str
     end
     return true
+end
+
+function _M.edit(self, cookie_key, edit_cookie)
+  -- Get the existing set-cookie header
+  local set_cookie = ngx_header['Set-Cookie']
+
+  -- The Set-Cookie header is a string when it's only sent once,
+  -- but is a table when it's sent twice or more. We're going to
+  -- normalize it into a table so that we can work with it.
+  if type(set_cookie) == "string" then set_cookie = {set_cookie} end
+
+  -- Iterate all Set-Cookie headers
+  for i,v in ipairs(set_cookie) do
+    -- Parse this cookie's details into a table
+    local cookie_parsed, err = self.parse_set_cookie(v)
+    if not cookie_parsed then
+        return nil, err
+    end
+
+    -- If this is the named cookie
+    if cookie_key == cookie_parsed['key'] then
+      -- Update its k/v pairs from our function input
+      for k,v in pairs(edit_cookie) do cookie_parsed[string.lower(k)] = v end
+
+      -- Then bake the cookie and put it back into the set_cookie table
+      local cookie_str, err, ext = bake(cookie_parsed)
+      if not cookie_str then
+          return nil, err, ext
+      end
+      set_cookie[i] = cookie_str
+    end
+  end
+
+  -- Now re-set the header
+  if #set_cookie > 1 then
+    ngx_header['Set-Cookie'] = set_cookie
+  elseif #set_cookie == 1 then
+    ngx_header['Set-Cookie'] = set_cookie[1]
+  else
+    return nil, "Tried to edit, but no cookies were found"
+  end
+
+  return true
+end
+
+-- This comes from nmap's http library
+function _M.parse_set_cookie(s)
+  local key, value
+  local _, pos
+
+  local cookie = {}
+  s = s:gsub(";", "; ")
+
+  -- Get the key=VALUE part.
+  _, pos, cookie.key, cookie.value = s:find("^[ \t]*(.-)[ \t]*=[ \t]*(.-)[ \t]*%f[;%z]")
+  if not (cookie.key or ""):find("^[^;]+$") then
+    return nil, "Can't get cookie key."
+  end
+
+  pos = pos + 1
+
+  -- Loop over the attributes.
+  while s:sub(pos, pos) == ";" do
+    _, pos, key = s:find("[ \t]*(.-)[ \t]*%f[=;%z]", pos + 1)
+    pos = pos + 1
+    if s:sub(pos, pos) == "=" then
+      _, pos, value = s:find("[ \t]*(.-)[ \t]*%f[;%z]", pos + 1)
+      pos = pos + 1
+    else
+      value = ""
+    end
+    key = key:lower()
+    if not (key == "" or key == "key" or key == "value") then
+      cookie[key] = value
+    end
+  end
+
+  return cookie
 end
 
 return _M
