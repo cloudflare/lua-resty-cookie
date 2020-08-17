@@ -38,8 +38,14 @@ __DATA__
 
             local fields = cookie:get_all()
 
-            for k, v in pairs(fields) do
-                ngx.say(k, " => ", v)
+            local keys = {}
+            for key in pairs(fields) do
+                table.insert(keys, key)
+            end
+            table.sort(keys)
+
+            for _, key in ipairs(keys) do
+                ngx.say(key, " => ", fields[key])
             end
         ';
     }
