@@ -68,7 +68,6 @@ local function get_cookie_table(text_cookie)
             end
         elseif state == EXPECT_VALUE then
             if byte(text_cookie, j) == SEMICOLON
-                    or byte(text_cookie, j) == SPACE
                     or byte(text_cookie, j) == HTAB
             then
                 value = sub(text_cookie, i, j - 1)
