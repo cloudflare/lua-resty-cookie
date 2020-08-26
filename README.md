@@ -14,6 +14,8 @@ Table of Contents
     * [get](#get)
     * [get_all](#get_all)
     * [set](#set)
+    * [edit](#edit)
+    * [parse_set_cookie](#parse_set_cookie)
 * [Installation](#installation)
 * [Authors](#authors)
 * [Copyright and License](#copyright-and-license)
@@ -132,6 +134,70 @@ If the same cookie (whole cookie string, e.g. "Name=Bob; Expires=Wed, 09 Jun 202
 
 [Back to TOC](#table-of-contents)
 
+edit
+----
+```lua
+syntax: ok, err = cookie_obj:edit(cookie_name, {
+  value = "Bob",
+  path = "/",
+  domain = "example.com",
+  secure = true, httponly = true,
+  expires = "Wed, 09 Jun 2021 10:18:14 GMT",
+  max_age = 50,
+  samesite = "Strict",
+  extension = "a4334aebaec"
+})
+```
+
+Edits the outgoing `Set-Cookie` header of the specified `cookie_name`, overriding the header's original directives with the ones provided in the table. Returns `true` if the header is edited successfully, and `nil` when there's an error, including when no `Set-Cookie` header matches the supplied `cookie_name`.
+
+The table can contain as many or as few arguments as you need to modify. For example:
+```lua
+ok, err = cookie_obj:edit("PHPSESSID", {secure = true, samesite = "None"})
+```
+
+parse_set_cookie
+----------------
+
+```lua
+syntax: cookie_obj.parse_set_cookie("Set-Cookie: CookieName=CookieValue; Domain=example.com; Secure; HttpOnly")
+```
+
+This function allows you to parse a `Set-Cookie` header into a Lua table, and exists primarily to facilitate the [`edit` function](#edit). Only works on string input. To walk a table and parse, then edit all `Set-Cookie` headers, see the following example:
+
+```lua
+local ck = require "resty.cookie"
+local cookie, err = ck:new()
+if not cookie then
+  ngx.log(ngx.ERR, err)
+  return
+end
+
+-- Check for the Set-Cookie header and quit if we don't see it
+if ngx.header['Set-Cookie'] == nil then return end
+
+-- Get all set-cookie headers and gather into a table
+local ngx_set_cookie = ngx.header['Set-Cookie']
+if type(ngx_set_cookie) == "string" then ngx_set_cookie = {ngx_set_cookie} end
+
+-- Walk the Set-Cookie header table and modify each header
+for i,v in ipairs(ngx_set_cookie) do
+  -- Extract the cookie names
+  local cookie_table, err = cookie.parse_set_cookie(ngx_set_cookie[i])
+  if not cookie_table then
+    ngx.log(ngx.ERR, err)
+    return
+  end
+
+  -- Edit the cookie to insert SameSite=None; Secure
+  local edit_cookie, err = cookie:edit(cookie_table['key'], { SameSite = "None", Secure = "" })
+  if not edit_cookie then
+    ngx.log(ngx.ERR, err)
+    return
+  end
+end
+```
+
 Installation
 ============
 
@@ -182,4 +248,3 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [Back to TOC](#table-of-contents)
-
