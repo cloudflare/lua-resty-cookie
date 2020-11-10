@@ -91,7 +91,7 @@ new
 ---
 `syntax: cookie_obj = cookie()`
 
-Create a new cookie object for current request. You can get parsed cookie from client or set cookie to client later using this object.
+Create a new cookie object for current request. You can get a parsed cookie from the client or set a cookie to client later using this object.
 
 [Back to TOC](#table-of-contents)
 

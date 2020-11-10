@@ -141,7 +141,7 @@ local function bake(cookie)
     if (cookie.samesite) then
         local samesite = cookie.samesite
 
-        -- if we dont have a valid-looking attribute, ignore the attribute
+        -- if we don't have a valid-looking attribute, ignore the attribute
         if (samesite ~= "Strict" and samesite ~= "Lax" and samesite ~= "None") then
             log(WARN, "SameSite value must be 'Strict', 'Lax' or 'None'")
             cookie.samesite = nil
