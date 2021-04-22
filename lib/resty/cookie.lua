@@ -129,6 +129,14 @@ function _M.get_all(self)
     return self.cookie_table
 end
 
+function _M.get_cookie_size(self)
+    if not self._cookie then
+        return 0
+    end
+
+    return string.len(self._cookie)
+end
+
 local function bake(cookie)
     if not cookie.key or not cookie.value then
         return nil, 'missing cookie field "key" or "value"'

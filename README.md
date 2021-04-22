@@ -111,6 +111,14 @@ Get all client cookie key/value pairs in a lua table. On error, returns `nil` an
 
 [Back to TOC](#table-of-contents)
 
+get_cookie_size
+-------
+`syntax: size = cookie_obj:get_cookie_size()`
+
+Get the cookie size, i.e the string length of the cookie header value.
+
+[Back to TOC](#table-of-contents)
+
 set
 ---
 ```lua

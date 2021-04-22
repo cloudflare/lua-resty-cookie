@@ -5,7 +5,7 @@ use Cwd qw(cwd);
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3 + 6);
+plan tests => repeat_each() * (blocks() * 3 + 7);
 
 my $pwd = cwd();
 
@@ -383,3 +383,54 @@ GET /t
 Set-Cookie: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; SameSite=None; a4334aebaec
 --- response_body
 Set cookie
+
+=== TEST 11: Cookie size
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local size = cookie:get_cookie_size()
+            ngx.say("size", " => ", size)
+        ';
+    }
+--- request
+GET /t
+--- more_headers
+Cookie: SID=31d4d96e407aad42; lang=en-US
+--- no_error_log
+[error]
+--- response_body
+size => 32
+
+
+
+=== TEST 12: no cookie header
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck:new()
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                ngx.say(err)
+                return
+            end
+
+            local size = cookie:get_cookie_size()
+            ngx.say("size", " => ", size)
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- response_body
+size => 0
