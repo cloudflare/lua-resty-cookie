@@ -71,12 +71,18 @@ local function get_cookie_table(text_cookie)
                     or byte(text_cookie, j) == SPACE
                     or byte(text_cookie, j) == HTAB
             then
+                 if byte(text_cookie, j) == SPACE then
+                    if j > 1 and byte(text_cookie, j - 1) ~= SEMICOLON then
+                        goto NEXT
+                    end
+                end
                 value = sub(text_cookie, i, j - 1)
                 cookie_table[key] = value
 
                 key, value = nil, nil
                 state = EXPECT_SP
                 i = j + 1
+                ::NEXT::
             end
         elseif state == EXPECT_SP then
             if byte(text_cookie, j) ~= SPACE
