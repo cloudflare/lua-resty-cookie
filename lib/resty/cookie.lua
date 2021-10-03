@@ -208,4 +208,6 @@ function _M.set(self, cookie)
     return true
 end
 
+_M.get_cookie_string = bake
+
 return _M

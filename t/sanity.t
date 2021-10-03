@@ -434,3 +434,31 @@ GET /t
 [error]
 --- response_body
 size => 0
+
+
+
+=== TEST 13: get_cookie_string
+--- http_config eval: $::HttpConfig
+--- config
+    location /t {
+        content_by_lua '
+            local ck = require "resty.cookie"
+            local cookie, err = ck.get_cookie_string({
+                key = "Name", value = "Bob", path = "/",
+                domain = "example.com", secure = true, httponly = true,
+                expires = "Wed, 09 Jun 2021 10:18:14 GMT", max_age = 50,
+                samesite = "None", extension = "a4334aebaec"
+            })
+            if not cookie then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+            ngx.say("Cookie string: " .. cookie)
+        ';
+    }
+--- request
+GET /t
+--- no_error_log
+[error]
+--- response_body
+Cookie string: Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly; SameSite=None; a4334aebaec

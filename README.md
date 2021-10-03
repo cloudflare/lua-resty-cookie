@@ -13,7 +13,9 @@ Table of Contents
     * [new](#new)
     * [get](#get)
     * [get_all](#get_all)
+    * [get_cookie_size](#get_cookie_size)
     * [set](#set)
+    * [get_cookie_string](#get_cookie_string)
 * [Installation](#installation)
 * [Authors](#authors)
 * [Copyright and License](#copyright-and-license)
@@ -85,19 +87,13 @@ Synopsis
 Methods
 =======
 
-To load the `cookie` module,
-
-```
-local cookie = require "resty.cookie"
-```
-
 [Back to TOC](#table-of-contents)
 
 new
 ---
-`syntax: cookie_obj = cookie:new()`
+`syntax: cookie_obj = cookie()`
 
-Create a new cookie object for current request. You can get a parsed cookie from the client or set a cookie to client later using this object.
+Create a new cookie object for current request. You can get parsed cookie from client or set cookie to client later using this object.
 
 [Back to TOC](#table-of-contents)
 
@@ -143,6 +139,18 @@ syntax: ok, err = cookie_obj:set({
 
 Set a cookie to client. This will add a new 'Set-Cookie' response header. `key` and `value` are required, all other fields are optional.
 If the same cookie (whole cookie string, e.g. "Name=Bob; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Max-Age=50; Domain=example.com; Path=/; Secure; HttpOnly;") has already been setted, new cookie will be ignored.
+
+[Back to TOC](#table-of-contents)
+
+get_cookie_string
+---
+```lua
+syntax: cookie_string, err = cookie.get_cookie_string({ --[[ see "set" method ]] })
+```
+Retursns a cookie string representing the table passed. See the `set` method for details, but unlike `set`, this function doesn't change the
+current request response, but just return the generated string. On error, returns `nil` and an error message.
+
+This is a static function, not a method of the `cookie` object.
 
 [Back to TOC](#table-of-contents)
 
