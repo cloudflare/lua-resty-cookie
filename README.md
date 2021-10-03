@@ -85,11 +85,17 @@ Synopsis
 Methods
 =======
 
+To load the `cookie` module,
+
+```
+local cookie = require "resty.cookie"
+```
+
 [Back to TOC](#table-of-contents)
 
 new
 ---
-`syntax: cookie_obj = cookie()`
+`syntax: cookie_obj = cookie:new()`
 
 Create a new cookie object for current request. You can get a parsed cookie from the client or set a cookie to client later using this object.
 
