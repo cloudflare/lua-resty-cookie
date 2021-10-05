@@ -147,7 +147,7 @@ get_cookie_string
 ```lua
 syntax: cookie_string, err = cookie.get_cookie_string({ --[[ see "set" method ]] })
 ```
-Retursns a cookie string representing the table passed. See the `set` method for details, but unlike `set`, this function doesn't change the
+Returns a cookie string representing the table passed. See the `set` method for details, but unlike `set`, this function doesn't change the
 current request response, but just return the generated string. On error, returns `nil` and an error message.
 
 This is a static function, not a method of the `cookie` object.
