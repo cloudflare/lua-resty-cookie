@@ -2,7 +2,7 @@ package = "lua-resty-cookie"
 version = "scm-1"
 
 source = {
-  url = "git://github.com/cloudflare/lua-resty-cookie.git",
+  url = "https://github.com/cloudflare/lua-resty-cookie.git",
 }
 
 description = {
