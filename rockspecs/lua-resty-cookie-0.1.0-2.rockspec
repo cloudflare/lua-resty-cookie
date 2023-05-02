@@ -1,8 +1,8 @@
 package = "lua-resty-cookie"
-version = "0.1.0-1"
+version = "0.1.0-2"
 
 source = {
-  url = "git://github.com/cloudflare/lua-resty-cookie.git",
+  url = "https://github.com/cloudflare/lua-resty-cookie.git",
   tag = "v0.1.0",
 }
 
