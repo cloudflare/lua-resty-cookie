@@ -156,15 +156,43 @@ local function bake(cookie)
         end
     end
 
-    local str = cookie.key .. "=" .. cookie.value
-        .. (cookie.expires and "; Expires=" .. cookie.expires or "")
-        .. (cookie.max_age and "; Max-Age=" .. cookie.max_age or "")
-        .. (cookie.domain and "; Domain=" .. cookie.domain or "")
-        .. (cookie.path and "; Path=" .. cookie.path or "")
-        .. (cookie.secure and "; Secure" or "")
-        .. (cookie.httponly and "; HttpOnly" or "")
-        .. (cookie.samesite and "; SameSite=" .. cookie.samesite or "")
-        .. (cookie.extension and "; " .. cookie.extension or "")
+    local cookie_parts = new_tab(19, 0)
+    cookie_parts[#cookie_parts+1] = cookie.key
+    cookie_parts[#cookie_parts+1] = "="
+    cookie_parts[#cookie_parts+1] = cookie.value
+    if cookie.expires then
+      cookie_parts[#cookie_parts+1] = "; Expires="
+      cookie_parts[#cookie_parts+1] = cookie.expires
+    end
+    if cookie.max_age then
+      cookie_parts[#cookie_parts+1] = "; Max-Age="
+      cookie_parts[#cookie_parts+1] = cookie.max_age
+    end
+    if cookie.domain then
+      cookie_parts[#cookie_parts+1] = "; Domain="
+      cookie_parts[#cookie_parts+1] = cookie.domain
+    end
+    if cookie.path then
+      cookie_parts[#cookie_parts+1] = "; Path="
+      cookie_parts[#cookie_parts+1] = cookie.path
+    end
+    if cookie.secure then
+      cookie_parts[#cookie_parts+1] = "; Secure="
+      cookie_parts[#cookie_parts+1] = cookie.secure
+    end
+    if cookie.httponly then
+      cookie_parts[#cookie_parts+1] = "; HttpOnly="
+      cookie_parts[#cookie_parts+1] = cookie.httponly
+    end
+    if cookie.samesite then
+      cookie_parts[#cookie_parts+1] = "; SameSite="
+      cookie_parts[#cookie_parts+1] = cookie.samesite
+    end
+    if cookie.extension then
+      cookie_parts[#cookie_parts+1] = "; "
+      cookie_parts[#cookie_parts+1] = cookie.extension
+    end
+    local str = table.concat(cookie_parts, "")
     return str
 end
 
